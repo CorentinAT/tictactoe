@@ -33,15 +33,58 @@ bool is_col_complete(std::array<std::array<char, BOARD_SIZE>, BOARD_SIZE>& board
     return true;
 }
 
-bool is_finish(std::array<std::array<char, BOARD_SIZE>, BOARD_SIZE>& board) {
+bool is_diagonal_complete(std::array<std::array<char, BOARD_SIZE>, BOARD_SIZE>& board) {
+    bool main_diag = true;
     for(size_t i=1; i<board.size(); i++) {
+        if(board[i-1][i-1] != board[i][i] || board[i][i] == '.') {
+            main_diag = false;
+            break;
+        }
+    }
+    if(main_diag) return true;
+
+    bool anti_diag = true;
+    for(size_t i=1; i<board.size(); i++) {
+        if(board[i-1][board.size()-i] != board[i][board.size()-i-1] || board[i][board.size()-i-1] == '.') {
+            anti_diag = false;
+            break;
+        }
+    }
+    return anti_diag;
+}
+
+bool is_board_full(std::array<std::array<char, BOARD_SIZE>, BOARD_SIZE>& board) {
+    for(size_t i=0; i<board.size(); i++) {
+        for(size_t j=0; j<board[i].size(); j++) {
+            if(board[i][j] == DEFAULT_CHAR) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+bool is_finish(std::array<std::array<char, BOARD_SIZE>, BOARD_SIZE>& board) {
+    for(size_t i=0; i<board.size(); i++) {
         if(is_row_complete(board[i])) {
             return true;
         }
+    }
+    
+    for(size_t i=0; i<board.size(); i++) {
         if(is_col_complete(board, i)) {
             return true;
         }
     }
+    
+    if(is_diagonal_complete(board)) {
+        return true;
+    }
+    
+    if(is_board_full(board)) {
+        return true;
+    }
+    
     return false;
 }
 
@@ -128,7 +171,13 @@ int main()
 
     std::cout << std::endl;
 
-    std::cout << "Gagnant : " << playing->name << std::endl;
+    if(is_board_full(board) && !is_row_complete(board[0]) && !is_row_complete(board[1]) && !is_row_complete(board[2]) 
+       && !is_col_complete(board, 0) && !is_col_complete(board, 1) && !is_col_complete(board, 2) 
+       && !is_diagonal_complete(board)) {
+        std::cout << "Match nul ! Personne n'a gagné." << std::endl;
+    } else {
+        std::cout << "Gagnant : " << playing->name << std::endl;
+    }
     
     return 0;
 }
