@@ -4,6 +4,27 @@ project(TicTacToe)
 add_executable(${PROJECT_NAME})
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
 
+include(FetchContent)
+
+include(FetchContent)
+
+FetchContent_Declare(
+    terminal_ctrl
+    GIT_REPOSITORY https://github.com/dsmtE/terminal_ctrl
+    GIT_TAG main
+)
+
+FetchContent_MakeAvailable(terminal_ctrl)
+
+target_link_libraries(${PROJECT_NAME} PUBLIC terminal_ctrl)
+
+# Fix lib includes
+target_include_directories(${PROJECT_NAME} PUBLIC
+    ${terminal_ctrl_SOURCE_DIR}/include
+)
+
+
+
 # Set the folder where the executable is created
 set_target_properties(${PROJECT_NAME} PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/${CMAKE_BUILD_TYPE})
