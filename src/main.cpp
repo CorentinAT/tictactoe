@@ -171,7 +171,17 @@ int main()
         std::cout << std::endl << "Veuillez choisir un mode de jeu :" << std::endl;
         std::cout << "1. Deux joueurs" << std::endl;
         std::cout << "2. Un joueur contre l'IA" << std::endl;
+        std::cout << "3. Quitter le programme" << std::endl;
         std::cin >> game_mode;
+
+        if(std::cin.fail()) {
+            std::cin.clear();
+            std::cin.ignore(10000, '\n');
+        }
+
+        if(game_mode == 3) {
+            return 0;
+        }
 
         if(game_mode != 1 && game_mode != 2) {
             std::cout << "Invalide" << std::endl;
