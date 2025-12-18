@@ -105,12 +105,26 @@ void place_symbol(std::array<std::array<char, BOARD_SIZE>, BOARD_SIZE>& board, c
     board[row-1][col-1] = symbol;
 }
 
-void place_symbol_random(std::array<std::array<char, BOARD_SIZE>, BOARD_SIZE>& board, char symbol) {
+void place_symbol_robot(std::array<std::array<char, BOARD_SIZE>, BOARD_SIZE>& board, char symbol) {
     std::vector<std::pair<int, int>> free_cells {};
 
-    for(int i=0; i<board.size(); i++) {
-        for(int j=0; j<board.size(); j++) {
+    for(size_t i=0; i<board.size(); i++) {
+        for(size_t j=0; j<board.size(); j++) {
             if(board[i][j] == DEFAULT_CHAR) {
+                board[i][j] = symbol;
+                if(is_won(board)) {
+                    return;
+                }
+                if(symbol == 'X') {
+                    board[i][j] = 'O';
+                } else {
+                    board[i][j] = 'X';
+                }
+                if(is_won(board)) {
+                    board[i][j] = symbol;
+                    return;
+                }
+                board[i][j] = DEFAULT_CHAR;
                 free_cells.push_back({i, j});
             }
         }
@@ -168,8 +182,8 @@ int main()
 
     std::array<std::array<char, BOARD_SIZE>, BOARD_SIZE> board {};
     
-    for (int i = 0; i < board.size(); i++) {
-        for (int j = 0; j < board.size(); j++) {
+    for (size_t i = 0; i < board.size(); i++) {
+        for (size_t j = 0; j < board.size(); j++) {
             board[i][j] = DEFAULT_CHAR;
         }
     }
@@ -190,7 +204,7 @@ int main()
         std::cout << "Tour de " << playing->name << std::endl;
         
         if(game_mode == 2 && playing == &player2) {
-            place_symbol_random(board, playing->symbol);
+            place_symbol_robot(board, playing->symbol);
         } else {
             place_symbol(board, playing->symbol);
         }
