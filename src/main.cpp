@@ -1,6 +1,9 @@
 #include "Player.hpp"
 #include <iostream>
 #include <array>
+#include <vector>
+#include <cstdlib>
+#include <ctime>
 
 char const DEFAULT_CHAR {'.'};
 int const BOARD_SIZE {3};
@@ -15,9 +18,9 @@ void draw_game_board(std::array<std::array<char, BOARD_SIZE>, BOARD_SIZE>& board
     }
 }
 
-bool is_row_complete(std::array<char, BOARD_SIZE> row) {
+bool is_row_complete(std::array<char, BOARD_SIZE>& row) {
     for(size_t i = 1; i<row.size(); i++) {
-        if(row[i] != row[i-1] || row[i] == '.') {
+        if(row[i] != row[i-1] || row[i] == DEFAULT_CHAR) {
             return false;
         }
     }
@@ -26,7 +29,7 @@ bool is_row_complete(std::array<char, BOARD_SIZE> row) {
 
 bool is_col_complete(std::array<std::array<char, BOARD_SIZE>, BOARD_SIZE>& board, int col) {
     for(size_t i=1; i<board.size(); i++) {
-        if(board[i-1][col] != board[i][col] || board[i][col] == '.') {
+        if(board[i-1][col] != board[i][col] || board[i][col] == DEFAULT_CHAR) {
             return false;
         }
     }
@@ -36,7 +39,7 @@ bool is_col_complete(std::array<std::array<char, BOARD_SIZE>, BOARD_SIZE>& board
 bool is_diagonal_complete(std::array<std::array<char, BOARD_SIZE>, BOARD_SIZE>& board) {
     bool main_diag = true;
     for(size_t i=1; i<board.size(); i++) {
-        if(board[i-1][i-1] != board[i][i] || board[i][i] == '.') {
+        if(board[i-1][i-1] != board[i][i] || board[i][i] == DEFAULT_CHAR) {
             main_diag = false;
             break;
         }
@@ -45,7 +48,7 @@ bool is_diagonal_complete(std::array<std::array<char, BOARD_SIZE>, BOARD_SIZE>& 
 
     bool anti_diag = true;
     for(size_t i=1; i<board.size(); i++) {
-        if(board[i-1][board.size()-i] != board[i][board.size()-i-1] || board[i][board.size()-i-1] == '.') {
+        if(board[i-1][board.size()-i] != board[i][board.size()-i-1] || board[i][board.size()-i-1] == DEFAULT_CHAR) {
             anti_diag = false;
             break;
         }
@@ -64,7 +67,7 @@ bool is_board_full(std::array<std::array<char, BOARD_SIZE>, BOARD_SIZE>& board) 
     return true;
 }
 
-bool is_finish(std::array<std::array<char, BOARD_SIZE>, BOARD_SIZE>& board) {
+bool is_won(std::array<std::array<char, BOARD_SIZE>, BOARD_SIZE>& board) {
     for(size_t i=0; i<board.size(); i++) {
         if(is_row_complete(board[i])) {
             return true;
@@ -78,10 +81,6 @@ bool is_finish(std::array<std::array<char, BOARD_SIZE>, BOARD_SIZE>& board) {
     }
     
     if(is_diagonal_complete(board)) {
-        return true;
-    }
-    
-    if(is_board_full(board)) {
         return true;
     }
     
@@ -104,6 +103,24 @@ void place_symbol(std::array<std::array<char, BOARD_SIZE>, BOARD_SIZE>& board, c
     } while(board[row-1][col-1] != DEFAULT_CHAR);
 
     board[row-1][col-1] = symbol;
+}
+
+void place_symbol_random(std::array<std::array<char, BOARD_SIZE>, BOARD_SIZE>& board, char symbol) {
+    std::vector<std::pair<int, int>> free_cells {};
+
+    for(int i=0; i<board.size(); i++) {
+        for(int j=0; j<board.size(); j++) {
+            if(board[i][j] == DEFAULT_CHAR) {
+                free_cells.push_back({i, j});
+            }
+        }
+    }
+
+    int index = std::rand() % free_cells.size();
+    int row = free_cells[index].first;
+    int col = free_cells[index].second;
+
+    board[row][col] = symbol;
 }
 
 int main()
@@ -140,8 +157,8 @@ int main()
             player2 = create_player('X');
         }
     } else {
-        Player player1 = create_player();
-        Player player2;
+        std::srand(std::time(nullptr));
+        player1 = create_player();
         if(player1.symbol == 'X') {
             player2 = create_player("IA", 'O');
         } else {
@@ -149,12 +166,19 @@ int main()
         }
     }
 
-    std::array<std::array<char, BOARD_SIZE>, BOARD_SIZE> board = {{{DEFAULT_CHAR, DEFAULT_CHAR, DEFAULT_CHAR}, {DEFAULT_CHAR, DEFAULT_CHAR, DEFAULT_CHAR}, {DEFAULT_CHAR, DEFAULT_CHAR, DEFAULT_CHAR}}};
+    std::array<std::array<char, BOARD_SIZE>, BOARD_SIZE> board {};
+    
+    for (int i = 0; i < board.size(); i++) {
+        for (int j = 0; j < board.size(); j++) {
+            board[i][j] = DEFAULT_CHAR;
+        }
+    }
+
     draw_game_board(board);
 
     Player *playing = &player2;
 
-    while(!is_finish(board)) {
+    while(!is_won(board) && !is_board_full(board)) {
         std::cout << std::endl;
 
         if(playing == &player1) {
@@ -164,16 +188,19 @@ int main()
         }
 
         std::cout << "Tour de " << playing->name << std::endl;
-        place_symbol(board, playing->symbol);
+        
+        if(game_mode == 2 && playing == &player2) {
+            place_symbol_random(board, playing->symbol);
+        } else {
+            place_symbol(board, playing->symbol);
+        }
 
         draw_game_board(board);
     }
 
     std::cout << std::endl;
 
-    if(is_board_full(board) && !is_row_complete(board[0]) && !is_row_complete(board[1]) && !is_row_complete(board[2]) 
-       && !is_col_complete(board, 0) && !is_col_complete(board, 1) && !is_col_complete(board, 2) 
-       && !is_diagonal_complete(board)) {
+    if(is_board_full(board) && !is_won(board)) {
         std::cout << "Match nul ! Personne n'a gagné." << std::endl;
     } else {
         std::cout << "Gagnant : " << playing->name << std::endl;
