@@ -90,17 +90,41 @@ bool is_won(std::array<std::array<char, BOARD_SIZE>, BOARD_SIZE>& board) {
 void place_symbol(std::array<std::array<char, BOARD_SIZE>, BOARD_SIZE>& board, char symbol) {
     int row {};
     int col {};
+    bool valid_input {false};
 
     do {
         std::cout << "Entrez le numéro de la ligne à laquelle vous voulez placer : ";
         std::cin >> row;
+        
+        if(std::cin.fail()) {
+            std::cin.clear();
+            std::cin.ignore(10000, '\n');
+            std::cout << "Entrée invalide" << std::endl << std::endl;
+            continue;
+        }
+
         std::cout << "Entrez le numéro de la colonne à laquelle vous voulez placer : ";
         std::cin >> col;
 
+        if(std::cin.fail()) {
+            std::cin.clear();
+            std::cin.ignore(10000, '\n');
+            std::cout << "Entrée invalide" << std::endl << std::endl;
+            continue;
+        }
+
+        if(row < 1 || row > BOARD_SIZE || col < 1 || col > BOARD_SIZE) {
+            std::cout << "Case invalide" << std::endl << std::endl;
+            continue;
+        }
+
         if(board[row-1][col-1] != DEFAULT_CHAR) {
             std::cout << "La case est déjà prise, entrez en une autre" << std::endl << std::endl;
+            continue;
         }
-    } while(board[row-1][col-1] != DEFAULT_CHAR);
+
+        valid_input = true;
+    } while(!valid_input);
 
     board[row-1][col-1] = symbol;
 }
