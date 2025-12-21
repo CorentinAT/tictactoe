@@ -11,7 +11,7 @@ void place_symbol(std::array<std::array<char, BOARD_SIZE>, BOARD_SIZE>& board, c
     bool valid_input {false};
 
     do {
-        std::cout << "Entrez le numéro de la ligne à laquelle vous voulez placer : ";
+        std::cout << "Entrez le numéro de la ligne à laquelle vous voulez placer (1 à 3 de haut en bas) : ";
         std::cin >> row;
         
         if(std::cin.fail()) {
@@ -21,7 +21,7 @@ void place_symbol(std::array<std::array<char, BOARD_SIZE>, BOARD_SIZE>& board, c
             continue;
         }
 
-        std::cout << "Entrez le numéro de la colonne à laquelle vous voulez placer : ";
+        std::cout << "Entrez le numéro de la colonne à laquelle vous voulez placer (1 à 3 de gauche à droite) : ";
         std::cin >> col;
 
         if(std::cin.fail()) {
